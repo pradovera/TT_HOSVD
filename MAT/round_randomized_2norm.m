@@ -13,7 +13,7 @@ function [ W, Z ] = round_randomized_2norm(A, epsilon, q)
     Y = A * Omega;
     
     W = []; Z = [];
-    while 1/pi*max(sum(Y.^2,1)) > epsilon2 * normA2
+    while 200/pi*max(sum(Y.^2,1)) > epsilon2 * normA2
         k = randi(q);
         w0 = Y(:, k);
         w0 = w0 / norm(w0);
