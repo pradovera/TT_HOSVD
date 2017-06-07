@@ -1,15 +1,15 @@
-function R = multiply_hada_TT(Xl, Yl, V, R0, r)
-    n = size(Xl, 2);
-    if n ~= size(Yl, 2)
+function Y = multiply_hada_TT(Al, Bl, Z, Y0, r)
+    n = size(Al, 2);
+    if n ~= size(Bl, 2)
         error('The second mode size of the two tensors must coincide')
     end
     
-    R = zeros(size(V, 1), n, r);
+    Y = zeros(size(Z, 1), n, r);
     for j = 1:n
-        Raux1 = tensorprod(R0, permute(Yl(:, j, :), [1,3,2]), 1);
-        Raux2 = reshape(tensorprod(Raux1, permute(Xl(:, j, :), [1,3,2]), 2), [size(Yl, 1) * size(Xl, 1), r]);
-        R(:, j, :) = V * Raux2;
+        Yaux1 = tensorprod(Y0, permute(Bl(:, j, :), [1,3,2]), 1);
+        Yaux2 = reshape(tensorprod(Yaux1, permute(Al(:, j, :), [1,3,2]), 2), [size(Bl, 1) * size(Al, 1), r]);
+        Y(:, j, :) = Z * Yaux2;
     end
-    R = reshape(R, [size(V, 1) * n, r]);
+    Y = reshape(Y, [size(Z, 1) * n, r]);
 end
 

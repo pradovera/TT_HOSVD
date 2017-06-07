@@ -2,16 +2,18 @@ function [U, V, Rs] = find_range_unfolding_TT(X, pos, Rs, k, p, dir)
     if ~exist('dir', 'var')
         dir = 'left';
     end
+    if ~strcmpi(dir, 'right') && ~strcmpi(dir, 'left') 
+        error('Unknown direction specified. Choose either LEFT or RIGHT') 
+    end
+
     d = X.order;
     
     if strcmpi(dir, 'right')
         Al = unfold(X.U{pos}, 'right')';
         posright = (1:pos-1);
-    elseif strcmpi(dir, 'left') 
+    else %if strcmpi(dir, 'left') 
         Al = unfold(X.U{pos}, 'left');
         posright = (d:-1:pos+1);
-    else
-        error('Unknown direction specified. Choose either LEFT or RIGHT') 
     end
     
     numgen = k + p - size(Rs{posright(end)}, 2);

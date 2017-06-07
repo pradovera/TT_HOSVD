@@ -1,6 +1,5 @@
 function [ lambda ] = PM(A, Z, target)
-%%% L is a cholesky factor of the target matrix
-%%% approximate 2-norm of LL'-WZ'
+%   approximate 2-norm of A-WZ'
     if ~exist('target', 'var')
         target = -1;
     end

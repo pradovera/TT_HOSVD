@@ -1,39 +1,41 @@
-function [U, V, Rs] = find_range_hada_unfolding_TT(X, Y, pos, Vold, Rs, k, p, dir)
+function [W, Z, Ys] = find_range_hada_unfolding_TT(A, B, pos, Zold, Ys, r, p, dir)
     if ~exist('dir', 'var')
         dir = 'left';
     end
-    d = X.order;
-    if d ~= Y.order
+    if ~strcmpi(dir, 'right') && ~strcmpi(dir, 'left') 
+        error('Unknown direction specified. Choose either LEFT or RIGHT') 
+    end
+
+    d = A.order;
+    if d ~= B.order
         error('The order of the two tensors must coincide')
     end
-    if ~isequal(X.size, Y.size)
+    if ~isequal(A.size, B.size)
         error('All the mode sizes of the two tensors must coincide')
     end
     
     if strcmpi(dir, 'right')
-        Xl = permute(X.U{pos}, [3, 2, 1]);
-        Yl = permute(Y.U{pos}, [3, 2, 1]);
+        Acore = permute(A.U{pos}, [3, 2, 1]);
+        Bcore = permute(B.U{pos}, [3, 2, 1]);
         posright = (1:pos-1);
-    elseif strcmpi(dir, 'left') 
-        Xl = X.U{pos};
-        Yl = Y.U{pos};
+    else %if strcmpi(dir, 'left') 
+        Acore = A.U{pos};
+        Bcore = B.U{pos};
         posright = (d:-1:pos+1);
-    else
-        error('Unknown direction specified. Choose either LEFT or RIGHT') 
     end
     
-    if ~isempty(Rs{posright(end)})
-        numgen = k + p - size(Rs{posright(end)}, 3);
+    if ~isempty(Ys{posright(end)})
+        numgen = r + p - size(Ys{posright(end)}, 3);
     else
-        numgen = k + p;
+        numgen = r + p;
     end
     if numgen > 0
-        Rs = update_stored_range_hada_TT(X, Y, Rs, numgen, posright, dir);
+        Ys = update_stored_range_hada_TT(A, B, Ys, numgen, posright, dir);
     end
     
-    R = multiply_hada_TT(Xl, Yl, Vold, Rs{posright(end)}(:, :, 1:k+p), k+p);
+    Y = multiply_hada_TT(Acore, Bcore, Zold, Ys{posright(end)}(:, :, 1:r+p), r+p);
     
-    [U, ~] = qr(R, 0);
-    V = left_project_hada_TT(Xl, Yl, Vold, U);
-    U = reshape(U, [size(Vold, 1), X.size(pos), size(U, 2)]);
+    [W, ~] = qr(Y, 0);
+    Z = left_project_hada_TT(Acore, Bcore, Zold, W);
+    W = reshape(W, [size(Zold, 1), A.size(pos), size(W, 2)]);
 end

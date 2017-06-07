@@ -1,4 +1,4 @@
-function [ W, Z ] = round_randomized_2norm_PM(A, epsilon, q)
+function [W, Z] = round_randomized_2norm_PM(A, epsilon, q)
 %%% Algorithm 4
     normA = PM(A, 0);
 
@@ -14,16 +14,16 @@ function [ W, Z ] = round_randomized_2norm_PM(A, epsilon, q)
     while normR > epsilon * normA
         for i = 1:q
             j = j + 1;
-            q0 = A * randn(n, 1);
+            w = A * randn(n, 1);
             if ~isempty(W)
                 for ii = 1:2
-                    q0 = q0 - W * (q0' * W)';
+                    w = w - W * (w' * W)';
                 end
             end
-            q0 = q0 / norm(q0);
-            W = [W, q0];
-            z0 = A' * q0;
-            Z = [Z, z0];
+            w = w / norm(w);
+            W = [W, w];
+            z = A' * w;
+            Z = [Z, z];
         end
         normR = PM(A, Z);
     end

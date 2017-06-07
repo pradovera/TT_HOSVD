@@ -1,4 +1,4 @@
-function [ W, Z ] = round_randomized(A, epsilon, q)
+function [W, Z] = round_randomized(A, epsilon, q)
 %%% Algorithm 3
     n = size(A, 2);
     epsilon2 = epsilon^2;
@@ -11,21 +11,21 @@ function [ W, Z ] = round_randomized(A, epsilon, q)
     [W, ~] = qr(A * Omega, 0);
     Z = A' * W;
     
-    normfro2 = cumsum(sum(Z.^2, 1))';
+    normZ2 = cumsum(sum(Z.^2, 1))';
     
     j = 0;
-    while (j == 0) || (((normfro2(j + q) - normfro2(j)) > epsilon2 * normfro2(j + q)) &&...
-            ((j == 1) || (abs((normfro2(j + q) - normfro2(j)) / normfro2(j + q) -...
-            (normfro2(j + q - 1) - normfro2(j - 1)) / normfro2(j + q - 1)) > 10 * eps)))
+    while (j == 0) || (((normZ2(j + q) - normZ2(j)) > epsilon2 * normZ2(j + q)) &&...
+            ((j == 1) || (abs((normZ2(j + q) - normZ2(j)) / normZ2(j + q) -...
+            (normZ2(j + q - 1) - normZ2(j - 1)) / normZ2(j + q - 1)) > 10 * eps)))
         j = j + 1;
-        q0 = A * randn(n, 1);
+        w = A * randn(n, 1);
         for ii = 1:2
-            q0 = q0 - W * (q0' * W)';
+            w = w - W * (w' * W)';
         end
-        q0 = q0 / norm(q0);
-        W = [W, q0];
-        s0 = A' * q0;
-        Z = [Z, s0];
-        normfro2 = [normfro2; normfro2(end) + sum(s0.^2)];
+        w = w / norm(w);
+        W = [W, w];
+        z = A' * w;
+        Z = [Z, z];
+        normZ2 = [normZ2; normZ2(end) + sum(z.^2)];
     end
 end

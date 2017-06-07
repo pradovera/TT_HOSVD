@@ -1,64 +1,49 @@
-function [Z, Rs] = truncate_hada_TT_randomized(X, Y, r, p, dir, recompress, Rs)
+function [C, Ys] = truncate_hada_TT_randomized(A, B, r, p, dir, Ys)
     if ~exist('dir', 'var')
         dir = 'left';
     end
-    if ~exist('recompress', 'var')
-        recompress = false;
+    if ~strcmpi(dir, 'right') && ~strcmpi(dir, 'left') 
+        error('Unknown direction specified. Choose either LEFT or RIGHT') 
     end
-    d = X.order;
-    if d ~= Y.order
+
+    d = A.order;
+    if d ~= B.order
         error('The order of the two tensors must coincide')
     end
-    if ~isequal(X.size, Y.size)
+    if ~isequal(A.size, B.size)
         error('All the mode sizes of the two tensors must coincide')
     end
     
     if ~exist('Rs', 'var')
-        Rs = cell(1, d);
+        Ys = cell(1, d);
     end
     cores = cell(1, d);
-    V = 1;
+    Z = 1;
 
     if strcmpi(dir, 'right')
         for i = d:-1:2
-            k = min(r(i), X.rank(i) * Y.rank(i));
-            [U, V, Rs] = find_range_hada_unfolding_TT(X, Y, i, V, Rs, k, p, 'right');
+            rEff = min(r(i), A.rank(i) * B.rank(i));
+            [W, Z, Ys] = find_range_hada_unfolding_TT(A, B, i, Z, Ys, rEff, p, 'right');
             
-            if recompress
-                [U1, S1, V1] = svd(V, 'econ');
-                k = trunc_singular(diag(S1), r);
-                U = tensorprod(U, U1(:, 1:k)', 3);
-                V = S1(1:k, 1:k) * V1(:, 1:k)';
-            end
-
-            cores{i} = permute(U, [3, 2, 1]);
+            cores{i} = permute(W, [3, 2, 1]);
         end
         i = 1;
-        A = unfold(X.U{i}, 'left')';
-        B = unfold(Y.U{i}, 'left')';
-        VAB = V * kr(A, B);
-        cores{i} = permute(reshape(VAB, [size(V, 1), X.size(i), 1]), [3, 2, 1]);
-   elseif strcmpi(dir, 'left') 
+        Acore = unfold(A.U{i}, 'left')';
+        Bcore = unfold(B.U{i}, 'left')';
+        ZAB = Z * kr(Acore, Bcore);
+        cores{i} = permute(reshape(ZAB, [size(Z, 1), A.size(i), 1]), [3, 2, 1]);
+   else %if strcmpi(dir, 'left') 
         for i = 1:d-1
-            k = min(r(i + 1), X.rank(i + 1) * Y.rank(i + 1));
-            [U, V, Rs] = find_range_hada_unfolding_TT(X, Y, i, V, Rs, k, p, 'left');
+            rEff = min(r(i + 1), A.rank(i + 1) * B.rank(i + 1));
+            [W, Z, Ys] = find_range_hada_unfolding_TT(A, B, i, Z, Ys, rEff, p, 'left');
             
-            if recompress
-                [U1, S1, V1] = svd(V, 'econ');
-                k = trunc_singular(diag(S1), r);
-                U = tensorprod(U, U1(:, 1:k)', 3);
-                V = S1(1:k, 1:k) * V1(:, 1:k)';
-            end
-
-            cores{i} = U;
+            cores{i} = W;
         end
         i = d;
-        A = unfold(X.U{i}, 'right');
-        B = unfold(Y.U{i}, 'right');
-        VAB = V * kr(A, B);
-        cores{i} = reshape(VAB, [size(V, 1), X.size(i), 1]);
-    else
-        error('Unknown direction specified. Choose either LEFT or RIGHT') 
+        Acore = unfold(A.U{i}, 'right');
+        Bcore = unfold(B.U{i}, 'right');
+        ZAB = Z * kr(Acore, Bcore);
+        cores{i} = reshape(ZAB, [size(Z, 1), A.size(i), 1]);
     end
-    Z = TTeMPS(cores);
+    C = TTeMPS(cores);
 end

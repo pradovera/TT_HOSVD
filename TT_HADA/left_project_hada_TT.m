@@ -1,20 +1,20 @@
-function V = left_project_hada_TT(Xl, Yl, Vold, U)
-    n = size(Xl, 2);
-    if n ~= size(Yl, 2)
+function Z = left_project_hada_TT(Al, Bl, Zold, W)
+    n = size(Al, 2);
+    if n ~= size(Bl, 2)
         error('The second mode size of the two tensors must coincide')
     end
     
-    Xlperm = permute(Xl, [3, 1, 2]);
-    Ylperm = permute(Yl, [3, 1, 2]);
+    Xlperm = permute(Al, [3, 1, 2]);
+    Ylperm = permute(Bl, [3, 1, 2]);
     
-    r = size(U, 2);
-    U = reshape(U, [size(Vold, 1), n, r]);
+    r = size(W, 2);
+    W = reshape(W, [size(Zold, 1), n, r]);
 
-    V1p = permute(tensorprod(U, Vold', 1), [1, 3, 2]);
-    V = zeros(size(Yl, 3), size(Xl, 3), r);
+    Z1p = permute(tensorprod(W, Zold', 1), [1, 3, 2]);
+    Z = zeros(size(Bl, 3), size(Al, 3), r);
     for j = 1:n
-        V1t = reshape(V1p(:, :, j), [size(Yl, 1), size(Xl, 1), r]);
-        V = V + tensorprod(tensorprod(V1t, Ylperm(:, :, j), 1), Xlperm(:, :, j), 2);
+        Z1t = reshape(Z1p(:, :, j), [size(Bl, 1), size(Al, 1), r]);
+        Z = Z + tensorprod(tensorprod(Z1t, Ylperm(:, :, j), 1), Xlperm(:, :, j), 2);
     end
-    V = reshape(V, [size(Xl, 3) * size(Yl, 3), r])';
+    Z = reshape(Z, [size(Al, 3) * size(Bl, 3), r])';
 end

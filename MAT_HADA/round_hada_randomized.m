@@ -30,14 +30,13 @@ function [ W, Z ] = round_hada_randomized(W1, Z1, W2, Z2, epsilon, q)
         Z(:, ii) = sum((Z1 * Y1) .* Z2, 2);
     end
     
-    normfro2 = cumsum(sum(Z.^2, 1))';
+    normZ2 = cumsum(sum(Z.^2, 1))';
     
     j = 0;
-    while (j == 0) || ((normfro2(j + q) - normfro2(j)) > epEff * normfro2(j + q))
+    while (j == 0) || ((normZ2(j + q) - normZ2(j)) > epEff * normZ2(j + q))
         j = j + 1;
         Y1 = Z1' * bsxfun(@times, Z2, randn(n, 1));
         w = sum((W1 * Y1) .* W2, 2);
-        w = w / norm(w);
         for jj = 1:2
             w = w - W * (W' * w);
         end
@@ -48,6 +47,6 @@ function [ W, Z ] = round_hada_randomized(W1, Z1, W2, Z2, epsilon, q)
         z = sum((Z1 * Y1) .* Z2, 2);
         Z = [Z, z];
         
-        normfro2 = [normfro2; normfro2(end) + sum(z.^2)];
+        normZ2 = [normZ2; normZ2(end) + sum(z.^2)];
     end
 end
